@@ -1,0 +1,552 @@
+{
+  "info": {
+    "_postman_id": "c88f34d1-6c2e-4a6f-99f2-studentsphere-01",
+    "name": "StudentSphere API - Practical 6 Test Collection",
+    "description": "Comprehensive Postman test suite for StudentSphere RESTful CRUD API (MITAOE Web Technology Practical No. 6). Tests all endpoints, validation rules, status codes, and persistence.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Checks server health and database readiness."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Service status is UP and DB connected\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql(\"UP\");",
+              "    pm.expect(jsonData.database).to.eql(\"connected\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create Student (Valid Data)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Aarav Sharma\",\n  \"prn\": \"2301234\",\n  \"email\": \"aarav.sharma@mitaoe.ac.in\",\n  \"mobile\": \"9876543210\",\n  \"department\": \"Computer Engineering\",\n  \"year\": \"Third Year\",\n  \"dob\": \"2004-06-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Creates a new student record and stores the generated ObjectId into collection variable studentId."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Student created successfully\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.true;",
+              "    pm.expect(res.data).to.have.property(\"id\");",
+              "    pm.collectionVariables.set(\"studentId\", res.data.id || res.data._id);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create Student (Invalid Email)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Rohan Patil\",\n  \"prn\": \"2309876\",\n  \"email\": \"not-a-valid-email-string\",\n  \"mobile\": \"9811223344\",\n  \"department\": \"Computer Engineering\",\n  \"year\": \"Third Year\",\n  \"dob\": \"2004-05-10\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Verifies that malformed email strings are rejected with 400 Bad Request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Error structure contains email field validation error\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.errors.some(e => e.field === 'email')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Create Student (Missing Required Fields)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Pooja Deshmukh\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Verifies that missing required fields trigger 400 Bad Request with field errors list."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Validation errors list includes missing required fields\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.errors.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Create Student (Invalid Mobile Number)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Suresh Joshi\",\n  \"prn\": \"2305544\",\n  \"email\": \"suresh.joshi@mitaoe.ac.in\",\n  \"mobile\": \"12345\",\n  \"department\": \"Information Technology\",\n  \"year\": \"Second Year\",\n  \"dob\": \"2005-01-20\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Verifies that non-10-digit mobile numbers are rejected."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Rejects invalid mobile length\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.errors.some(e => e.field === 'mobile')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Create Student (Duplicate PRN or Email)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Duplicate User\",\n  \"prn\": \"2301234\",\n  \"email\": \"different.email@mitaoe.ac.in\",\n  \"mobile\": \"9876543210\",\n  \"department\": \"Computer Engineering\",\n  \"year\": \"Third Year\",\n  \"dob\": \"2004-06-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Verifies that attempting to register an existing PRN triggers 409 Conflict."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "pm.test(\"Returns duplicate key error message\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.message).to.include(\"already exists\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Get All Students",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Retrieves the full array of registered student records."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Returns student array\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.true;",
+              "    pm.expect(Array.isArray(res.data)).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Get Student by Valid ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}"]
+        },
+        "description": "Fetches single student using dynamic variable captured from creation."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Student details match captured ID\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.true;",
+              "    pm.expect(res.data.id || res.data._id).to.eql(pm.collectionVariables.get(\"studentId\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Get Student by Malformed ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/malformed-id-12345",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "malformed-id-12345"]
+        },
+        "description": "Verifies that invalid MongoDB ObjectId strings return 400 Bad Request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Returns invalid ObjectId format error\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.message).to.include(\"Invalid student ID format\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Get Student That Does Not Exist",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/507f1f77bcf86cd799439011",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "507f1f77bcf86cd799439011"]
+        },
+        "description": "Verifies that valid 24-char ObjectId not in database returns 404 Not Found."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Returns not found message\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.message).to.include(\"not found\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Update Student (Valid Data)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Aarav S. Sharma\",\n  \"prn\": \"2301234\",\n  \"email\": \"aarav.updated@mitaoe.ac.in\",\n  \"mobile\": \"9876543210\",\n  \"department\": \"Computer Engineering\",\n  \"year\": \"Final Year\",\n  \"dob\": \"2004-06-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}"]
+        },
+        "description": "Updates the student's name, email, and year."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Student fields updated successfully\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.true;",
+              "    pm.expect(res.data.name).to.eql(\"Aarav S. Sharma\");",
+              "    pm.expect(res.data.year).to.eql(\"Final Year\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Update Student (Invalid Data)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Aarav S. Sharma\",\n  \"prn\": \"2301234\",\n  \"email\": \"invalid-email-address\",\n  \"mobile\": \"12345\",\n  \"department\": \"Computer Engineering\",\n  \"year\": \"Final Year\",\n  \"dob\": \"2004-06-15\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}"]
+        },
+        "description": "Verifies that submitting invalid data during update triggers 400 Bad Request."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Validation rejected invalid updates\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.errors.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Delete Existing Student",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{studentId}}"]
+        },
+        "description": "Deletes the student record referenced by {{studentId}}."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Delete confirmation returned\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.true;",
+              "    pm.expect(res.message).to.include(\"deleted successfully\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Delete Nonexistent Student",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/507f1f77bcf86cd799439011",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "507f1f77bcf86cd799439011"]
+        },
+        "description": "Verifies that deleting a nonexistent student returns 404 Not Found."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Returns not found error\", function () {",
+              "    const res = pm.response.json();",
+              "    pm.expect(res.success).to.be.false;",
+              "    pm.expect(res.message).to.include(\"not found\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Get All Students After Deletion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Verifies that the deleted record is no longer present."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Deleted student is absent from records\", function () {",
+              "    const res = pm.response.json();",
+              "    const currentId = pm.collectionVariables.get(\"studentId\");",
+              "    const exists = res.data.some(s => (s.id === currentId || s._id === currentId));",
+              "    pm.expect(exists).to.be.false;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
