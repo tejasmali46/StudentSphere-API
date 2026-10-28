@@ -1,7 +1,9 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const express = require('express');
 const cors = require('cors');
-const { connectDB, isDBConnected } = require('./config/db');
+const { connectDB, isDBConnected, getDBStatus } = require('./config/db');
 const studentRoutes = require('./routes/studentRoutes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
@@ -32,14 +34,19 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health Check Endpoint (Deployment readiness and DB probe)
+// Health Check Endpoint (Reports actual database connection status)
 app.get('/health', (req, res) => {
-  const dbConnected = isDBConnected();
+  const dbStatus = getDBStatus();
 
-  if (dbConnected) {
+  if (dbStatus.connected) {
     return res.status(200).json({
       status: 'UP',
       database: 'connected',
+      details: {
+        host: dbStatus.host,
+        databaseName: dbStatus.name,
+        state: dbStatus.state,
+      },
       service: 'StudentSphere API',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -50,6 +57,10 @@ app.get('/health', (req, res) => {
       status: 'DEGRADED',
       database: 'disconnected',
       service: 'StudentSphere API',
+      details: {
+        state: dbStatus.state,
+        targetUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/studentsphere_db',
+      },
       message: 'Server is running but database connection is unavailable.',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -57,8 +68,20 @@ app.get('/health', (req, res) => {
   }
 });
 
-// Mount Resource Routes
-app.use('/api/students', studentRoutes);
+// Middleware: Ensure database is connected before handling DB-dependent routes
+// Prevents unhandled Mongoose buffering errors when the DB is down
+const checkDBReady = (req, res, next) => {
+  if (!isDBConnected()) {
+    return res.status(503).json({
+      success: false,
+      message: 'Database connection is currently unavailable. Please verify MongoDB is running at mongodb://127.0.0.1:27017/studentsphere_db.',
+    });
+  }
+  next();
+};
+
+// Mount Resource Routes with DB readiness verification
+app.use('/api/students', checkDBReady, studentRoutes);
 
 // 404 Route Handler
 app.use(notFound);
@@ -69,19 +92,26 @@ app.use(errorHandler);
 // Server startup logic
 let server;
 
-// Only start the listener if this file is executed directly (not imported by tests)
-if (process.env.NODE_ENV !== 'test') {
-  // Connect to MongoDB
-  connectDB();
+const startServer = async () => {
+  // Ensure MongoDB connects BEFORE opening HTTP port to accept requests
+  await connectDB();
 
-  server = app.listen(PORT, () => {
-    console.log(`====================================================`);
-    console.log(`🚀 StudentSphere API Server running on port ${PORT}`);
-    console.log(`📡 Local URL: http://localhost:${PORT}`);
-    console.log(`🩺 Health check: http://localhost:${PORT}/health`);
-    console.log(`📚 Students endpoint: http://localhost:${PORT}/api/students`);
-    console.log(`====================================================`);
+  return new Promise((resolve) => {
+    server = app.listen(PORT, () => {
+      console.log(`====================================================`);
+      console.log(`🚀 StudentSphere API Server running on port ${PORT}`);
+      console.log(`📡 Local URL: http://localhost:${PORT}`);
+      console.log(`🩺 Health check: http://localhost:${PORT}/health`);
+      console.log(`📚 Students endpoint: http://localhost:${PORT}/api/students`);
+      console.log(`====================================================`);
+      resolve(server);
+    });
   });
+};
+
+// Only start the listener if this file is executed directly (not imported by test runner or other scripts)
+if (require.main === module) {
+  startServer();
 }
 
 // Graceful shutdown handling
@@ -94,4 +124,4 @@ process.on('SIGTERM', () => {
   }
 });
 
-module.exports = { app, server };
+module.exports = { app, server, startServer };
