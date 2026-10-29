@@ -7,18 +7,23 @@ const Student = require('../models/Student');
  */
 const createStudent = async (req, res, next) => {
   try {
-    const { name, prn, email, mobile, department, year, dob } = req.body;
+    const { name, rollNumber, prn, rollNo, email, course, department, year, mobile, dob } = req.body;
+    const rollVal = rollNumber || prn || rollNo;
+    const courseVal = course || department;
 
-    // Check for existing PRN or email to provide specific, friendly feedback
-    const existingPrn = await Student.findOne({ prn });
-    if (existingPrn) {
+    // Check for duplicate Roll Number / PRN
+    const existingRoll = await Student.findOne({
+      $or: [{ rollNumber: rollVal }, { prn: rollVal }, { rollNo: rollVal }],
+    });
+    if (existingRoll) {
       return res.status(409).json({
         success: false,
-        message: `Student with PRN '${prn}' already exists.`,
-        errors: [{ field: 'prn', message: 'PRN is already registered to another student.' }],
+        message: `Student with roll number / PRN '${rollVal}' already exists.`,
+        errors: [{ field: 'rollNumber', message: 'Roll number is already registered to another student.' }],
       });
     }
 
+    // Check for duplicate Email
     const existingEmail = await Student.findOne({ email });
     if (existingEmail) {
       return res.status(409).json({
@@ -30,11 +35,14 @@ const createStudent = async (req, res, next) => {
 
     const newStudent = await Student.create({
       name,
-      prn,
+      rollNumber: rollVal,
+      prn: rollVal,
+      rollNo: rollVal,
       email,
-      mobile,
-      department,
+      course: courseVal,
+      department: courseVal,
       year,
+      mobile,
       dob,
     });
 
@@ -102,7 +110,9 @@ const getStudentById = async (req, res, next) => {
 const updateStudent = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, prn, email, mobile, department, year, dob } = req.body;
+    const { name, rollNumber, prn, rollNo, email, course, department, year, mobile, dob } = req.body;
+    const rollVal = rollNumber || prn || rollNo;
+    const courseVal = course || department;
 
     const existingStudent = await Student.findById(id);
     if (!existingStudent) {
@@ -112,14 +122,17 @@ const updateStudent = async (req, res, next) => {
       });
     }
 
-    // Check duplicate PRN against other students
-    if (prn && prn !== existingStudent.prn) {
-      const duplicatePrn = await Student.findOne({ prn, _id: { $ne: id } });
-      if (duplicatePrn) {
+    // Check duplicate Roll Number / PRN against other students
+    if (rollVal && rollVal !== existingStudent.rollNumber && rollVal !== existingStudent.prn) {
+      const duplicateRoll = await Student.findOne({
+        _id: { $ne: id },
+        $or: [{ rollNumber: rollVal }, { prn: rollVal }, { rollNo: rollVal }],
+      });
+      if (duplicateRoll) {
         return res.status(409).json({
           success: false,
-          message: `Cannot update: PRN '${prn}' is already in use by another student.`,
-          errors: [{ field: 'prn', message: 'PRN must be unique.' }],
+          message: `Cannot update: Roll number / PRN '${rollVal}' is already in use by another student.`,
+          errors: [{ field: 'rollNumber', message: 'Roll number must be unique.' }],
         });
       }
     }
@@ -136,9 +149,22 @@ const updateStudent = async (req, res, next) => {
       }
     }
 
+    const updateData = {
+      name,
+      rollNumber: rollVal,
+      prn: rollVal,
+      rollNo: rollVal,
+      email,
+      course: courseVal,
+      department: courseVal,
+      year,
+      mobile,
+      dob,
+    };
+
     const updatedStudent = await Student.findByIdAndUpdate(
       id,
-      { name, prn, email, mobile, department, year, dob },
+      updateData,
       { returnDocument: 'after', runValidators: true }
     );
 
@@ -175,7 +201,7 @@ const deleteStudent = async (req, res, next) => {
       data: {
         id: deletedStudent.id || deletedStudent._id,
         name: deletedStudent.name,
-        prn: deletedStudent.prn,
+        rollNumber: deletedStudent.rollNumber || deletedStudent.prn || deletedStudent.rollNo,
       },
     });
   } catch (error) {

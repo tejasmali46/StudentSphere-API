@@ -33,17 +33,27 @@ afterAll(async () => {
   }
 });
 
-const sampleStudentPayload = {
+// Payload matching faculty specification
+const facultyStudentPayload = {
   name: 'Aarav Sharma',
-  prn: '2301234',
+  rollNumber: '2301234',
   email: 'aarav.sharma@mitaoe.ac.in',
+  course: 'Computer Engineering',
+  year: 3,
+};
+
+// Payload matching legacy PRN format for backward compatibility
+const legacyStudentPayload = {
+  name: 'Rohan Patil',
+  prn: '2301235',
+  email: 'rohan.patil@mitaoe.ac.in',
   mobile: '9876543210',
-  department: 'Computer Engineering',
+  department: 'Information Technology',
   year: 'Third Year',
   dob: '2004-06-15',
 };
 
-describe('StudentSphere RESTful API - Automated Test Suite', () => {
+describe('Student Records RESTful API - Automated Test Suite', () => {
   // =========================================================================
   // 1. Root & Health Check Endpoints
   // =========================================================================
@@ -52,7 +62,7 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       const res = await request(app).get('/');
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toContain('StudentSphere API');
+      expect(res.body.message).toContain('Student Records RESTful API');
       expect(res.body.endpoints).toBeDefined();
     });
 
@@ -68,18 +78,35 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
   // 2. CREATE STUDENT (POST /api/students)
   // =========================================================================
   describe('POST /api/students (Create Student)', () => {
-    it('should create a new student record with valid payload (HTTP 201)', async () => {
+    it('should create a new student record with faculty required fields (HTTP 201)', async () => {
       const res = await request(app)
         .post('/api/students')
-        .send(sampleStudentPayload);
+        .send(facultyStudentPayload);
 
       expect(res.statusCode).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('Student created successfully.');
-      expect(res.body.data.name).toBe(sampleStudentPayload.name);
-      expect(res.body.data.prn).toBe(sampleStudentPayload.prn);
-      expect(res.body.data.email).toBe(sampleStudentPayload.email);
+      expect(res.body.data.name).toBe(facultyStudentPayload.name);
+      expect(res.body.data.rollNumber).toBe(facultyStudentPayload.rollNumber);
+      expect(res.body.data.email).toBe(facultyStudentPayload.email);
+      expect(res.body.data.course).toBe(facultyStudentPayload.course);
+      expect(res.body.data.year).toBe(3);
       expect(res.body.data.id).toBeDefined();
+    });
+
+    it('should create a new student record with legacy/extended fields (HTTP 201)', async () => {
+      const res = await request(app)
+        .post('/api/students')
+        .send(legacyStudentPayload);
+
+      expect(res.statusCode).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe('Student created successfully.');
+      expect(res.body.data.name).toBe(legacyStudentPayload.name);
+      expect(res.body.data.prn).toBe(legacyStudentPayload.prn);
+      expect(res.body.data.rollNumber).toBe(legacyStudentPayload.prn);
+      expect(res.body.data.email).toBe(legacyStudentPayload.email);
+      expect(res.body.data.year).toBe(3);
     });
 
     it('should reject creation when missing required fields (HTTP 400)', async () => {
@@ -93,15 +120,17 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       expect(res.body.success).toBe(false);
       expect(res.body.message).toBe('Validation failed.');
       expect(Array.isArray(res.body.errors)).toBe(true);
-      expect(res.body.errors.some((e) => e.field === 'prn')).toBe(true);
+      expect(res.body.errors.some((e) => e.field === 'rollNumber')).toBe(true);
       expect(res.body.errors.some((e) => e.field === 'email')).toBe(true);
+      expect(res.body.errors.some((e) => e.field === 'course')).toBe(true);
+      expect(res.body.errors.some((e) => e.field === 'year')).toBe(true);
     });
 
     it('should reject invalid email format (HTTP 400)', async () => {
       const res = await request(app)
         .post('/api/students')
         .send({
-          ...sampleStudentPayload,
+          ...facultyStudentPayload,
           email: 'not-a-valid-email',
         });
 
@@ -110,11 +139,24 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       expect(res.body.errors.some((e) => e.field === 'email')).toBe(true);
     });
 
-    it('should reject invalid mobile number (HTTP 400)', async () => {
+    it('should reject invalid academic year out of range 1-4 (HTTP 400)', async () => {
       const res = await request(app)
         .post('/api/students')
         .send({
-          ...sampleStudentPayload,
+          ...facultyStudentPayload,
+          year: 5,
+        });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.errors.some((e) => e.field === 'year')).toBe(true);
+    });
+
+    it('should reject invalid mobile number when provided (HTTP 400)', async () => {
+      const res = await request(app)
+        .post('/api/students')
+        .send({
+          ...facultyStudentPayload,
           mobile: '12345', // Not 10 digits
         });
 
@@ -123,14 +165,14 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       expect(res.body.errors.some((e) => e.field === 'mobile')).toBe(true);
     });
 
-    it('should reject invalid future date of birth (HTTP 400)', async () => {
+    it('should reject invalid future date of birth when provided (HTTP 400)', async () => {
       const futureDate = new Date();
       futureDate.setFullYear(futureDate.getFullYear() + 2);
 
       const res = await request(app)
         .post('/api/students')
         .send({
-          ...sampleStudentPayload,
+          ...facultyStudentPayload,
           dob: futureDate.toISOString(),
         });
 
@@ -139,16 +181,14 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       expect(res.body.errors.some((e) => e.field === 'dob')).toBe(true);
     });
 
-    it('should reject duplicate PRN (HTTP 409 Conflict)', async () => {
-      // First creation
-      await request(app).post('/api/students').send(sampleStudentPayload);
+    it('should reject duplicate rollNumber (HTTP 409 Conflict)', async () => {
+      await request(app).post('/api/students').send(facultyStudentPayload);
 
-      // Attempt second creation with identical PRN
       const res = await request(app)
         .post('/api/students')
         .send({
-          ...sampleStudentPayload,
-          email: 'different.email@mitaoe.ac.in', // Different email, same PRN
+          ...facultyStudentPayload,
+          email: 'different.email@mitaoe.ac.in',
         });
 
       expect(res.statusCode).toBe(409);
@@ -157,15 +197,13 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
     });
 
     it('should reject duplicate email (HTTP 409 Conflict)', async () => {
-      // First creation
-      await request(app).post('/api/students').send(sampleStudentPayload);
+      await request(app).post('/api/students').send(facultyStudentPayload);
 
-      // Attempt second creation with identical email but different PRN
       const res = await request(app)
         .post('/api/students')
         .send({
-          ...sampleStudentPayload,
-          prn: '2309999',
+          ...facultyStudentPayload,
+          rollNumber: '2309999',
         });
 
       expect(res.statusCode).toBe(409);
@@ -187,15 +225,13 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
     });
 
     it('should return all student records when records exist (HTTP 200)', async () => {
-      await Student.create(sampleStudentPayload);
+      await Student.create(facultyStudentPayload);
       await Student.create({
         name: 'Neha Kulkarni',
-        prn: '2301235',
+        rollNumber: '2301235',
         email: 'neha.kulkarni@mitaoe.ac.in',
-        mobile: '9822012345',
-        department: 'Information Technology',
-        year: 'Third Year',
-        dob: '2004-09-20',
+        course: 'Information Technology',
+        year: 3,
       });
 
       const res = await request(app).get('/api/students');
@@ -211,12 +247,13 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
   // =========================================================================
   describe('GET /api/students/:id (Get Student by ID)', () => {
     it('should return student record when ID exists (HTTP 200)', async () => {
-      const created = await Student.create(sampleStudentPayload);
+      const created = await Student.create(facultyStudentPayload);
 
       const res = await request(app).get(`/api/students/${created._id}`);
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.prn).toBe(sampleStudentPayload.prn);
+      expect(res.body.data.rollNumber).toBe(facultyStudentPayload.rollNumber);
+      expect(res.body.data.course).toBe(facultyStudentPayload.course);
     });
 
     it('should return 400 for malformed MongoDB ObjectId', async () => {
@@ -240,16 +277,14 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
   // =========================================================================
   describe('PUT /api/students/:id (Update Student)', () => {
     it('should update student with valid data (HTTP 200)', async () => {
-      const created = await Student.create(sampleStudentPayload);
+      const created = await Student.create(facultyStudentPayload);
 
       const updatePayload = {
         name: 'Aarav S. Sharma',
-        prn: created.prn,
+        rollNumber: created.rollNumber,
         email: 'aarav.updated@mitaoe.ac.in',
-        mobile: '9988776655',
-        department: 'Computer Engineering',
-        year: 'Final Year',
-        dob: '2004-06-15',
+        course: 'Computer Engineering',
+        year: 4,
       };
 
       const res = await request(app)
@@ -260,17 +295,17 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.name).toBe('Aarav S. Sharma');
       expect(res.body.data.email).toBe('aarav.updated@mitaoe.ac.in');
-      expect(res.body.data.year).toBe('Final Year');
+      expect(res.body.data.year).toBe(4);
     });
 
     it('should return 400 for invalid data during update', async () => {
-      const created = await Student.create(sampleStudentPayload);
+      const created = await Student.create(facultyStudentPayload);
 
       const res = await request(app)
         .put(`/api/students/${created._id}`)
         .send({
-          ...sampleStudentPayload,
-          mobile: '0000', // Invalid
+          ...facultyStudentPayload,
+          email: 'bad-email-address',
         });
 
       expect(res.statusCode).toBe(400);
@@ -281,7 +316,7 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
       const nonExistentId = new mongoose.Types.ObjectId();
       const res = await request(app)
         .put(`/api/students/${nonExistentId}`)
-        .send(sampleStudentPayload);
+        .send(facultyStudentPayload);
 
       expect(res.statusCode).toBe(404);
       expect(res.body.success).toBe(false);
@@ -293,7 +328,7 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
   // =========================================================================
   describe('DELETE /api/students/:id (Delete Student)', () => {
     it('should delete existing student (HTTP 200)', async () => {
-      const created = await Student.create(sampleStudentPayload);
+      const created = await Student.create(facultyStudentPayload);
 
       const res = await request(app).delete(`/api/students/${created._id}`);
       expect(res.statusCode).toBe(200);
@@ -320,7 +355,7 @@ describe('StudentSphere RESTful API - Automated Test Suite', () => {
   });
 
   // =========================================================================
-  // 7. 404 Route & Error Handling
+  // 7. 404 Route & Malformed Request Handling
   // =========================================================================
   describe('Error Handling Middleware', () => {
     it('should return 404 JSON for undefined routes', async () => {

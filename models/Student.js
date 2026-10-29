@@ -9,13 +9,26 @@ const studentSchema = new mongoose.Schema(
       minlength: [2, 'Name must be at least 2 characters long.'],
       maxlength: [100, 'Name cannot exceed 100 characters.'],
     },
-    prn: {
+    // rollNumber is the primary roll / PRN identifier required by faculty
+    rollNumber: {
       type: String,
-      required: [true, 'PRN (Permanent Registration Number) is required.'],
+      required: [true, 'Roll number is required.'],
       unique: true,
       trim: true,
       uppercase: true,
-      match: [/^[A-Z0-9]{6,12}$/, 'PRN must be 6 to 12 alphanumeric characters.'],
+      match: [/^[A-Za-z0-9-]{3,15}$/, 'Roll number must be 3 to 15 alphanumeric characters.'],
+    },
+    // prn alias maintained for backward compatibility with existing tests and records
+    prn: {
+      type: String,
+      trim: true,
+      uppercase: true,
+    },
+    // rollNo alias maintained for Render API compatibility
+    rollNo: {
+      type: String,
+      trim: true,
+      uppercase: true,
     },
     email: {
       type: String,
@@ -28,50 +41,30 @@ const studentSchema = new mongoose.Schema(
         'Please provide a valid email address.',
       ],
     },
-    mobile: {
+    // course is required by faculty; department maintained for backward compatibility
+    course: {
       type: String,
-      required: [true, 'Mobile number is required.'],
+      required: [true, 'Course is required.'],
       trim: true,
-      match: [
-        /^[6-9]\d{9}$/,
-        'Mobile number must be a valid 10-digit Indian phone number starting with 6-9.',
-      ],
     },
     department: {
       type: String,
-      required: [true, 'Department is required.'],
       trim: true,
-      enum: {
-        values: [
-          'Computer Engineering',
-          'Information Technology',
-          'Electronics & Telecommunication',
-          'Mechanical Engineering',
-          'Civil Engineering',
-          'Chemical Engineering',
-          'Design Engineering',
-        ],
-        message: '{VALUE} is not a supported department.',
-      },
     },
+    // year: numeric (1-4) representing academic year of study
     year: {
-      type: String,
+      type: Number,
       required: [true, 'Academic year is required.'],
+      min: [1, 'Academic year must be between 1 and 4.'],
+      max: [4, 'Academic year must be between 1 and 4.'],
+    },
+    // Optional additional fields for real-world profile support
+    mobile: {
+      type: String,
       trim: true,
-      enum: {
-        values: ['First Year', 'Second Year', 'Third Year', 'Final Year'],
-        message: '{VALUE} is not a valid academic year.',
-      },
     },
     dob: {
       type: Date,
-      required: [true, 'Date of birth is required.'],
-      validate: {
-        validator: function (value) {
-          return value instanceof Date && !isNaN(value) && value < new Date();
-        },
-        message: 'Date of birth must be a valid date in the past.',
-      },
     },
   },
   {
@@ -87,7 +80,21 @@ const studentSchema = new mongoose.Schema(
   }
 );
 
-// Note: 'unique: true' on 'prn' and 'email' fields automatically creates unique MongoDB indexes
+// Pre-save hook: ensure aliases stay synchronized (Mongoose v8 sync hook)
+studentSchema.pre('save', function () {
+  const rollVal = this.rollNumber || this.prn || this.rollNo;
+  if (rollVal) {
+    this.rollNumber = rollVal.trim().toUpperCase();
+    this.prn = this.rollNumber;
+    this.rollNo = this.rollNumber;
+  }
+
+  const courseVal = this.course || this.department;
+  if (courseVal) {
+    this.course = courseVal.trim();
+    this.department = this.course;
+  }
+});
 
 const Student = mongoose.model('Student', studentSchema);
 

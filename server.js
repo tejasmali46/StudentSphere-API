@@ -19,10 +19,13 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to StudentSphere API — Student Record Management System',
+    message: 'Welcome to Student Records RESTful API',
     version: '1.0.0',
     institution: 'MIT Academy of Engineering, Pune',
-    course: 'Web Technology (2304362L) - Practical 6',
+    department: 'School of Computer Engineering',
+    course: 'Web Technology (2304362L)',
+    assignment: 'Practical No. 6: RESTful CRUD API for Student Records',
+    courseOutcome: 'CO4',
     endpoints: {
       health: 'GET /health',
       getAllStudents: 'GET /api/students',
@@ -34,7 +37,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health Check Endpoint (Reports actual database connection status)
+// Health Check Endpoint (Reports actual database connection status without leaking credentials)
 app.get('/health', (req, res) => {
   const dbStatus = getDBStatus();
 
@@ -47,19 +50,17 @@ app.get('/health', (req, res) => {
         databaseName: dbStatus.name,
         state: dbStatus.state,
       },
-      service: 'StudentSphere API',
+      service: 'Student Records REST API',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     });
   } else {
-    // Return HTTP 503 Service Unavailable if database is not reachable
     return res.status(503).json({
       status: 'DEGRADED',
       database: 'disconnected',
-      service: 'StudentSphere API',
+      service: 'Student Records REST API',
       details: {
         state: dbStatus.state,
-        targetUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/studentsphere_db',
       },
       message: 'Server is running but database connection is unavailable.',
       timestamp: new Date().toISOString(),
@@ -69,12 +70,11 @@ app.get('/health', (req, res) => {
 });
 
 // Middleware: Ensure database is connected before handling DB-dependent routes
-// Prevents unhandled Mongoose buffering errors when the DB is down
 const checkDBReady = (req, res, next) => {
   if (!isDBConnected()) {
     return res.status(503).json({
       success: false,
-      message: 'Database connection is currently unavailable. Please verify MongoDB is running at mongodb://127.0.0.1:27017/studentsphere_db.',
+      message: 'Database connection is currently unavailable. Please verify MongoDB server connectivity.',
     });
   }
   next();
@@ -99,7 +99,7 @@ const startServer = async () => {
   return new Promise((resolve) => {
     server = app.listen(PORT, () => {
       console.log(`====================================================`);
-      console.log(`🚀 StudentSphere API Server running on port ${PORT}`);
+      console.log(`🚀 Student Records REST API Server running on port ${PORT}`);
       console.log(`📡 Local URL: http://localhost:${PORT}`);
       console.log(`🩺 Health check: http://localhost:${PORT}/health`);
       console.log(`📚 Students endpoint: http://localhost:${PORT}/api/students`);
@@ -109,7 +109,7 @@ const startServer = async () => {
   });
 };
 
-// Only start the listener if this file is executed directly (not imported by test runner or other scripts)
+// Only start listener if executed directly
 if (require.main === module) {
   startServer();
 }

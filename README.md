@@ -1,95 +1,106 @@
-# StudentSphere API — Student Record Management System
+# Student Records RESTful CRUD API
 
-**Subject:** Web Technology (2304362L)  
-**Practical No. 6:** RESTful API  
 **Institution:** MIT Academy of Engineering, Pune (MITAOE)  
-**Author:** B.Tech Computer Engineering Student (Third Year)  
+**Department:** School of Computer Engineering  
+**Course:** Web Technology (2304362L) — T.Y. B.Tech (AY 2025–26)  
+**Practical No. 6:** RESTful API  
+**Course Outcome:** CO4 — Build dynamic, database-backed web applications and APIs  
+**Maximum Marks:** 10 Marks  
 
 ---
 
-## 1. Project Overview
+## 1. Project Title & Aim
 
-**StudentSphere API** is a robust, production-ready RESTful CRUD backend service engineered with **Node.js**, **Express.js**, and **MongoDB / Mongoose**. It provides standardized resource-oriented endpoints for creating, retrieving, updating, and deleting student academic records while enforcing strict schema constraints, data validation, duplicate conflict prevention, and uniform JSON responses.
+### Project Title
+**RESTful CRUD API for Student Records, Deployed and Tested with Postman**
 
-### Key Features
-- **Strict RESTful Design:** Resource-based URLs with semantic HTTP verbs (`GET`, `POST`, `PUT`, `DELETE`).
-- **Comprehensive Server-Side Validation:** Validates formats for Indian phone numbers (10 digits), college PRNs, RFC-compliant emails, academic departments, years of study, and dates of birth.
-- **Unique Constraint Enforcement:** Uniqueness indexing and pre-save checks for both PRN and Email with HTTP `409 Conflict` resolution.
-- **Health Check & Readiness:** `/health` endpoint performing live connection probes on the MongoDB database.
-- **Centralized Error Handling:** Uniform JSON responses for validation errors, CastErrors (malformed MongoDB ObjectIds), duplicate keys, and syntax errors without leaking server stack traces.
-- **Automated Testing Suite:** 22 automated integration test cases built with Jest and Supertest.
-- **Postman Collection:** Complete v2.1.0 collection with test assertions and automatic dynamic variable chaining (`studentId`).
+### Aim
+To design, implement, deploy, and test a complete resource-based RESTful API that performs CRUD (Create, Read, Update, Delete) operations on student records stored in a database (MongoDB Atlas / local MongoDB), enforce comprehensive server-side input validation, return standard HTTP status codes (`200 OK`, `201 Created`, `400 Bad Request`, `404 Not Found`, `409 Conflict`, `500 Internal Server Error`) with uniform JSON responses, and thoroughly verify all operations using automated tests and Postman.
 
 ---
 
-## 2. Technology Stack
+## 2. Project Description
 
-- **Runtime:** Node.js (v18+ / v20+ / v24+)
-- **Web Framework:** Express.js (v4.21.2)
-- **Database:** MongoDB Atlas (Hosted) / Local MongoDB Server
-- **ODM:** Mongoose (v8.9.5)
-- **Cross-Origin Security:** CORS
-- **Configuration:** Dotenv
-- **Automated Testing:** Jest, Supertest
-- **API Client:** Postman
-- **Version Control & Deployment:** Git, GitHub, Render
+This project provides a clean, modular, and production-ready RESTful web service engineered with **Node.js**, **Express.js**, and **MongoDB Atlas** via **Mongoose ODM**. It adheres strictly to REST architectural constraints:
+- **Resource-Oriented URIs:** `/api/students` and `/api/students/:id`
+- **Standard HTTP Verbs:** `POST` (create), `GET` (read all & by ID), `PUT` (update), `DELETE` (delete).
+- **Strict Data Validation:** Validates required fields, RFC-compliant email formatting, unique roll numbers, and academic study year (1 to 4).
+- **Security & Integrity:** Validates 24-character hexadecimal MongoDB ObjectIds before querying, returns structured error messages, and avoids exposing database credentials or server stack traces.
+- **Resilience:** Implements a `/health` readiness probe reporting database connection states.
 
 ---
 
-## 3. Project Directory Structure
+## 3. Technology Stack
+
+| Layer | Technology | Purpose |
+| --- | --- | --- |
+| **Runtime** | Node.js (v18+ / v20+ / v24+) | High-performance asynchronous non-blocking JavaScript engine |
+| **Framework** | Express.js (v4.21.2) | Minimalist web application framework for routing and middleware |
+| **Database** | MongoDB Atlas / Local MongoDB | Distributed document-oriented NoSQL database with WiredTiger engine |
+| **ODM** | Mongoose (v8.9.5) | Object Data Modeling library with schema validation and type casting |
+| **API Testing** | Postman | Manual and automated collection execution with test assertions |
+| **Automated Testing** | Jest & Supertest | 24 automated unit & integration tests running in under 2 seconds |
+| **Deployment** | Render Cloud Platform | Cloud hosting for the live REST API web service |
+| **Version Control** | Git & GitHub | Source code tracking and continuous deployment |
+
+---
+
+## 4. Project Folder Structure
 
 ```text
 StudentSphere-API/
-│
-├── server.js                               # Application entry point & Express configuration
-├── package.json                            # Project metadata, dependencies & scripts
-├── package-lock.json                       # Dependency lockfile
-├── .gitignore                              # Git ignore rules (node_modules, .env, etc.)
-├── .env.example                            # Configuration template with placeholder credentials
-├── .env                                    # Local environment variables (do NOT commit)
-├── README.md                               # Project documentation & execution guide
+├── server.js                                # Application entry point, Express config & health probes
+├── package.json                             # Dependencies, scripts & metadata
+├── package-lock.json                        # Dependency lockfile
+├── .gitignore                               # Git ignore rules (node_modules, .env, etc.)
+├── .env.example                             # Configuration template with placeholder credentials
+├── .env                                     # Local environment variables (do NOT commit)
+├── README.md                                # Project documentation & execution guide
+├── Student_Records_REST_API.postman_collection.json # Exportable Postman collection
+├── build_report_p6.py                       # ReportLab PDF report generation script
+├── PRN_Name_P6_Report.pdf                   # Final academic laboratory report
 │
 ├── config/
-│   └── db.js                               # MongoDB connection logic and health check helper
+│   └── db.js                                # Resilient MongoDB connection & health probe helper
 │
 ├── models/
-│   └── Student.js                          # Mongoose schema and model definition
+│   └── Student.js                           # Mongoose schema, validation rules & pre-save hooks
 │
 ├── controllers/
-│   └── studentController.js                # Business logic for all CRUD operations
+│   └── studentController.js                 # Complete CRUD business logic with conflict checks
 │
 ├── routes/
-│   └── studentRoutes.js                    # Express router mapping routes to controllers
+│   └── studentRoutes.js                     # RESTful route declarations & middleware binding
 │
 ├── middleware/
-│   ├── validateStudent.js                  # Request body and ObjectId format validation
-│   ├── notFound.js                         # 404 Route Not Found JSON middleware
-│   └── errorHandler.js                     # Centralized error formatting middleware
+│   ├── validateStudent.js                   # Request body validation & hex ObjectId verification
+│   ├── notFound.js                          # 404 Route Not Found JSON middleware
+│   └── errorHandler.js                      # Centralized error handler preventing stack leakage
 │
 ├── tests/
-│   └── student.test.js                     # 22 Jest & Supertest integration tests
+│   └── student.test.js                      # 24 automated Jest & Supertest integration tests
 │
 ├── postman/
-│   └── StudentSphere_API.postman_collection.json # Exportable Postman collection
+│   └── Student_Records_REST_API.postman_collection.json # Postman collection backup
 │
-└── docs/
-    └── endpoint-documentation.md           # Exhaustive REST API route specifications
+└── assets/
+    └── architecture_diagram.png             # System architecture diagram
 ```
 
 ---
 
-## 4. Prerequisites
+## 5. Prerequisites
 
-Before running the application, make sure you have installed:
-1. **Node.js** (v18.0.0 or higher): Verify with `node -v`
-2. **npm** (v9.0.0 or higher): Verify with `npm -v`
-3. **Git**: Verify with `git --version`
+Before running the application, ensure the following are installed on your machine:
+1. **Node.js** (v18.0.0 or higher): Check with `node -v`
+2. **npm** (v9.0.0 or higher): Check with `npm -v`
+3. **Git**: Check with `git --version`
 4. **Postman**: For API verification
-5. Either a **MongoDB Atlas account** (Free Tier) or a **Local MongoDB Service** running on `mongodb://127.0.0.1:27017`.
+5. Either a free **MongoDB Atlas account** or a **Local MongoDB Service** running on `mongodb://127.0.0.1:27017`.
 
 ---
 
-## 5. Installation & Setup (Windows PowerShell)
+## 6. Installation & Setup
 
 ### Step 1: Navigate to the Project Directory
 ```powershell
@@ -101,242 +112,244 @@ cd StudentSphere-API
 npm install
 ```
 
-### Step 3: Configure Environment Variables
-Copy `.env.example` to create your local `.env` file:
+---
+
+## 7. Environment Variable Setup
+
+Create a `.env` file in the root directory (copy from `.env.example`):
 ```powershell
-Copy-Item .env.example .env
+cp .env.example .env
 ```
-Open `.env` in any text editor and configure your port and connection string:
+
+Configure the environment variables in `.env`:
 ```env
+# Server Port
 PORT=3000
+
+# Environment Mode
 NODE_ENV=development
+
+# MongoDB Connection String
+# For Local MongoDB (Default):
 MONGODB_URI=mongodb://127.0.0.1:27017/studentsphere_db
+
+# For MongoDB Atlas Cloud (Alternative):
+# MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.abcde.mongodb.net/studentsphere_db?retryWrites=true&w=majority
 ```
-*(If using MongoDB Atlas, replace `MONGODB_URI` with your Atlas SRV connection string as explained below).*
+
+> **Security Note:** Never commit `.env` or real database passwords to version control. The `.gitignore` file automatically excludes `.env`.
 
 ---
 
-## 6. MongoDB Atlas Configuration Guide
+## 8. MongoDB Atlas Configuration Instructions
 
-To deploy or connect to a cloud-hosted database on MongoDB Atlas:
-1. Navigate to [https://www.mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas) and sign in.
-2. Click **Build a Database** and select the **M0 Free** cluster tier.
-3. Choose a cloud provider and region (e.g. AWS / `ap-south-1` Mumbai).
-4. Under **Security Quickstart**:
-   - Create a database user (e.g. Username: `student_admin`, Password: `YourSecurePassword123!`).
-   - Under **IP Access List**, click **Add My Current IP Address**, or add `0.0.0.0/0` (Allow access from anywhere) so cloud hosts like Render can connect.
-5. Click **Finish and Close**, then navigate to **Database Deployments**.
-6. Click the **Connect** button on your cluster, select **Drivers**, and choose **Node.js**.
-7. Copy the SRV connection string:
-   ```text
-   mongodb+srv://student_admin:<password>@cluster0.abcde.mongodb.net/studentsphere_db?retryWrites=true&w=majority
-   ```
-8. In your `.env` file, set `MONGODB_URI` with your actual password (ensure special characters in passwords are URL-encoded).
+If using MongoDB Atlas in the cloud:
+1. Sign in to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Create a free shared cluster (M0 sandbox).
+3. Under **Database Access**, create a database user with `Read and write to any database` permissions and save the credentials.
+4. Under **Network Access**, click **Add IP Address** and choose **Allow Access from Anywhere (`0.0.0.0/0`)** so your local API and Render deployment can connect.
+5. In your cluster dashboard, click **Connect** > **Drivers** > copy the connection string.
+6. Replace `<username>` and `<password>` with your database user credentials.
+7. Paste this string into your `.env` as `MONGODB_URI` (or in Render's Environment Variables).
 
 ---
 
-## 7. Starting the Server
+## 9. Local Run Commands
 
-### Development Mode (with file watcher):
-```powershell
-npm run dev
-```
-
-### Production / Standard Mode:
+### Start in Normal Mode:
 ```powershell
 npm start
 ```
 
-When started, your console will show:
-```text
-====================================================
-🚀 StudentSphere API Server running on port 3000
-📡 Local URL: http://localhost:3000
-🩺 Health check: http://localhost:3000/health
-📚 Students endpoint: http://localhost:3000/api/students
-====================================================
-✅ MongoDB Connected successfully to host: 127.0.0.1
-📦 Database Name: studentsphere_db
+### Start in Development Mode (with automatic reload):
+```powershell
+npm run dev
 ```
 
----
-
-## 8. REST API Endpoints Summary
-
-| Method | Endpoint | Description | Status Code |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/health` | Live service health & DB connection probe | `200 OK` / `503 Service Unavailable` |
-| **POST** | `/api/students` | Create a new student record | `201 Created` / `400` / `409` |
-| **GET** | `/api/students` | Retrieve all student records | `200 OK` |
-| **GET** | `/api/students/:id` | Retrieve single student by 24-char ObjectId | `200 OK` / `400` / `404` |
-| **PUT** | `/api/students/:id` | Update student details by ObjectId | `200 OK` / `400` / `404` / `409` |
-| **DELETE**| `/api/students/:id` | Delete student record by ObjectId | `200 OK` / `400` / `404` |
+### Run Automated Integration Tests:
+```powershell
+npm test
+```
+*Expected test output:* **24 passed, 24 total** in under 2 seconds.
 
 ---
 
-## 9. Sample Requests & Responses
+## 10. Complete RESTful Endpoints Table
 
-### Sample POST Request Body:
+| HTTP Method | Endpoint URL | Purpose / Action | Expected Success Code | Important Failure Codes |
+| --- | --- | --- | --- | --- |
+| `GET` | `/` | API Root Welcome, Course Metadata & Route Manifest | `200 OK` | `500` |
+| `GET` | `/health` | Service Health & Database Connection Probe | `200 OK` | `503 Service Unavailable` |
+| `POST` | `/api/students` | Create a new student record | `201 Created` | `400 Bad Request`, `409 Conflict`, `500` |
+| `GET` | `/api/students` | Retrieve all student records | `200 OK` | `500` |
+| `GET` | `/api/students/:id` | Retrieve single student by 24-char ObjectId | `200 OK` | `400 Bad Request`, `404 Not Found`, `500` |
+| `PUT` | `/api/students/:id` | Update an existing student record | `200 OK` | `400 Bad Request`, `404 Not Found`, `409 Conflict`, `500` |
+| `DELETE` | `/api/students/:id` | Delete student record by ID | `200 OK` | `400 Bad Request`, `404 Not Found`, `500` |
+
+---
+
+## 11. Example Request Bodies
+
+### 1. Create Student (`POST /api/students`)
 ```json
 {
   "name": "Aarav Sharma",
-  "prn": "2301234",
+  "rollNumber": "2301234",
   "email": "aarav.sharma@mitaoe.ac.in",
-  "mobile": "9876543210",
-  "department": "Computer Engineering",
-  "year": "Third Year",
-  "dob": "2004-06-15"
+  "course": "Computer Engineering",
+  "year": 3
 }
 ```
 
-### Sample POST Success Response (`201 Created`):
+### 2. Update Student (`PUT /api/students/:id`)
+```json
+{
+  "name": "Aarav S. Sharma",
+  "rollNumber": "2301234",
+  "email": "aarav.updated@mitaoe.ac.in",
+  "course": "Computer Engineering",
+  "year": 4
+}
+```
+
+---
+
+## 12. Example Success & Error Responses
+
+### Success: Create Student (HTTP 201 Created)
 ```json
 {
   "success": true,
   "message": "Student created successfully.",
   "data": {
-    "id": "6ae1b95f70817b24375b277c",
     "name": "Aarav Sharma",
-    "prn": "2301234",
+    "rollNumber": "2301234",
     "email": "aarav.sharma@mitaoe.ac.in",
-    "mobile": "9876543210",
-    "department": "Computer Engineering",
-    "year": "Third Year",
-    "dob": "2004-06-15T00:00:00.000Z",
-    "createdAt": "2026-10-28T08:59:11.692Z",
-    "updatedAt": "2026-10-28T08:59:11.692Z"
+    "course": "Computer Engineering",
+    "year": 3,
+    "id": "6ae3b68843f0c07441f735af",
+    "createdAt": "2026-10-29T21:11:36.444Z",
+    "updatedAt": "2026-10-29T21:11:36.444Z"
   }
 }
 ```
 
-### Sample Validation Error Response (`400 Bad Request`):
+### Success: Get All Students (HTTP 200 OK)
+```json
+{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "id": "6ae3b68843f0c07441f735af",
+      "name": "Aarav Sharma",
+      "rollNumber": "2301234",
+      "email": "aarav.sharma@mitaoe.ac.in",
+      "course": "Computer Engineering",
+      "year": 3
+    }
+  ]
+}
+```
+
+### Error: Missing Required Fields (HTTP 400 Bad Request)
 ```json
 {
   "success": false,
   "message": "Validation failed.",
   "errors": [
-    {
-      "field": "mobile",
-      "message": "Mobile number must be a valid 10-digit Indian phone number starting with 6, 7, 8, or 9."
-    }
+    { "field": "rollNumber", "message": "Roll number / PRN is required." },
+    { "field": "email", "message": "Email address is required." },
+    { "field": "course", "message": "Course / Department is required." },
+    { "field": "year", "message": "Academic year is required (1, 2, 3, or 4)." }
+  ]
+}
+```
+
+### Error: Malformed MongoDB ObjectId (HTTP 400 Bad Request)
+```json
+{
+  "success": false,
+  "message": "Invalid student ID format: 'invalid-id'. Must be a 24-character hexadecimal string."
+}
+```
+
+### Error: Student Not Found (HTTP 404 Not Found)
+```json
+{
+  "success": false,
+  "message": "Student with ID '64b1f8e1234567890abcdef0' not found."
+}
+```
+
+### Error: Duplicate Roll Number or Email (HTTP 409 Conflict)
+```json
+{
+  "success": false,
+  "message": "Student with roll number / PRN '2301234' already exists.",
+  "errors": [
+    { "field": "rollNumber", "message": "Roll number is already registered to another student." }
   ]
 }
 ```
 
 ---
 
-## 10. Running Automated Tests
+## 13. Postman Collection Import Instructions
 
-The project includes 22 automated integration tests covering positive flows, invalid formats, missing fields, duplicate conflicts, malformed IDs, 404 handlers, and corrupted JSON bodies.
-
-Run the test suite using PowerShell:
-```powershell
-npm test
-```
-
-Expected output:
-```text
-PASS tests/student.test.js
-  StudentSphere RESTful API - Automated Test Suite
-    GET / and GET /health
-      √ should return welcome message and route manifest on GET / (HTTP 200)
-      √ should report healthy UP status when database is connected on GET /health (HTTP 200)
-    POST /api/students (Create Student)
-      √ should create a new student record with valid payload (HTTP 201)
-      √ should reject creation when missing required fields (HTTP 400)
-      √ should reject invalid email format (HTTP 400)
-      √ should reject invalid mobile number (HTTP 400)
-      √ should reject invalid future date of birth (HTTP 400)
-      √ should reject duplicate PRN (HTTP 409 Conflict)
-      √ should reject duplicate email (HTTP 409 Conflict)
-    GET /api/students (Get All Students)
-      √ should return empty list when no students exist (HTTP 200)
-      √ should return all student records when records exist (HTTP 200)
-    GET /api/students/:id (Get Student by ID)
-      √ should return student record when ID exists (HTTP 200)
-      √ should return 400 for malformed MongoDB ObjectId
-      √ should return 404 when valid ObjectId does not exist
-    PUT /api/students/:id (Update Student)
-      √ should update student with valid data (HTTP 200)
-      √ should return 400 for invalid data during update
-      √ should return 404 when updating non-existent student
-    DELETE /api/students/:id (Delete Student)
-      √ should delete existing student (HTTP 200)
-      √ should return 404 when deleting non-existent student
-      √ should return 400 when deleting with malformed ID
-    Error Handling Middleware
-      √ should return 404 JSON for undefined routes
-      √ should handle malformed JSON syntax gracefully (HTTP 400)
-
-Test Suites: 1 passed, 1 total
-Tests:       22 passed, 22 total
-```
-
----
-
-## 11. Importing & Running the Postman Collection
-
-1. Launch **Postman**.
+1. Open **Postman Desktop Client** or **Postman Web**.
 2. Click the **Import** button in the top-left corner.
-3. Drag and drop the file:  
-   `postman/StudentSphere_API.postman_collection.json`
-4. The collection **StudentSphere API - Practical 6 Test Collection** will appear in your left sidebar.
-5. In the collection settings, the `baseUrl` variable is pre-configured to `http://localhost:3000`. If testing on a deployed service, edit `baseUrl` to your deployed URL (e.g. `https://studentsphere-api.onrender.com`).
-6. Run the requests sequentially from **1 to 15**. Request 2 automatically captures the generated `_id` into the collection variable `studentId`, allowing requests 8, 11, 12, 13, and 15 to reference it without manual copying.
+3. Drag and drop the file: `Student_Records_REST_API.postman_collection.json`.
+4. The imported collection `Student Records REST API` contains 5 folders:
+   - **Create Student** (Creates student, runs assertions, captures `studentId` variable)
+   - **Read Students** (Retrieves all students and individual student by `studentId`)
+   - **Update Student** (Updates student record with new year and email)
+   - **Delete Student** (Deletes student record from database)
+   - **Error Handling** (Verifies 400 for missing fields, invalid email, malformed ID, and 404 for nonexistent ID)
+5. **Configuring Environment:** In Collection Variables, verify `baseUrl` is set to `http://localhost:3000` (or `https://studentsphere-api.onrender.com` for deployed testing).
+6. Click **Run Collection** to execute all requests and verify tests automatically.
 
 ---
 
-## 12. GitHub Publishing Instructions
+## 14. Deployment Instructions (Render)
 
-To publish your source code to GitHub cleanly:
-
-1. Initialize git and configure user (if not already set):
-   ```powershell
-   git init
-   ```
-2. Verify `.gitignore` is present so `.env` and `node_modules` are excluded:
-   ```powershell
-   git status
-   ```
-3. Stage and commit:
+1. Push your latest code to GitHub:
    ```powershell
    git add .
-   git commit -m "feat: complete RESTful CRUD StudentSphere API for Practical 6"
+   git commit -m "feat: complete student records REST API"
+   git push origin main
    ```
-4. Create a new public repository on GitHub (e.g. `StudentSphere-API`).
-5. Link remote and push:
-   ```powershell
-   git remote add origin https://github.com/<your-username>/StudentSphere-API.git
-   git branch -M main
-   git push -u origin main
-   ```
-
----
-
-## 13. Cloud Deployment Guide (Render)
-
-1. Sign up / Log in to [Render](https://render.com/).
-2. Click **New +** -> **Web Service**.
-3. Connect your GitHub repository `StudentSphere-API`.
-4. Configure the Web Service:
+2. Log in to [Render](https://render.com/).
+3. Click **New +** > **Web Service**.
+4. Connect your GitHub repository `StudentSphere-API`.
+5. Configure the service settings:
    - **Name:** `studentsphere-api`
-   - **Region:** Singapore / Frankfurt (or closest)
-   - **Branch:** `main`
    - **Runtime:** `Node`
    - **Build Command:** `npm install`
    - **Start Command:** `npm start`
-5. Under **Environment Variables**, add:
-   - `PORT`: `3000`
+   - **Instance Type:** `Free`
+6. Under **Environment Variables**, add:
    - `NODE_ENV`: `production`
-   - `MONGODB_URI`: `<Your MongoDB Atlas SRV connection string>`
-6. Ensure your MongoDB Atlas cluster has network access enabled for `0.0.0.0/0`.
+   - `MONGODB_URI`: `<your-mongodb-atlas-connection-string>`
 7. Click **Deploy Web Service**.
-8. Once deployed, test the live health check:
-   `https://<your-subdomain>.onrender.com/health`
+8. Once deployed, verify your live API using the `/health` endpoint.
 
 ---
 
-## 14. Known Limitations
+## 15. Verified Live Deployed API URL
 
-1. **Authentication:** The current practical focuses strictly on core RESTful CRUD architecture. Authentication (JWT / OAuth2) is intentionally omitted for simplicity.
-2. **Soft Deletes:** Records deleted via `DELETE` are permanently purged from the database rather than soft-deleted using a flag.
+- **Live Service Base URL:** `https://studentsphere-api.onrender.com`
+- **Health Check Endpoint:** `https://studentsphere-api.onrender.com/health`
+- **Students Resource Endpoint:** `https://studentsphere-api.onrender.com/api/students`
+
+---
+
+## 16. How the API Works
+
+1. **Request Reception:** An incoming HTTP request hits Express at `server.js`.
+2. **Readiness Probe:** If the route is `/health`, Express queries the Mongoose connection readyState.
+3. **Database Guard:** The `checkDBReady` middleware ensures Mongoose is actively connected before processing data routes, preventing buffering errors.
+4. **Validation Pipeline:** The request reaches `studentRoutes.js`. For `POST` and `PUT`, `validateStudent` sanitizes inputs and validates required fields. For route parameters `:id`, `validateObjectId` guarantees valid 24-character hexadecimal IDs.
+5. **Controller Processing:** `studentController.js` executes Mongoose model methods (`create`, `find`, `findById`, `findByIdAndUpdate`, `findByIdAndDelete`).
+6. **Conflict Protection:** Writes check existing records to prevent unique index collisions on `rollNumber` and `email`, returning HTTP 409 Conflict when duplicates are detected.
+7. **Response Serialization:** Results are formatted into consistent JSON bodies with appropriate HTTP status codes, never exposing internal database stack traces or credentials.
