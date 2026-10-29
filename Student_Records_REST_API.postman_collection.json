@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "c88f34d1-6c2e-4a6f-99f2-studentsphere-01",
     "name": "Student Records REST API",
-    "description": "Official Postman Collection for Web Technology (2304362L) Assignment 6: RESTful CRUD API for Student Records. Tested with local and deployed endpoints.",
+    "description": "Official Postman Collection for Web Technology (2304362L) Assignment 6: RESTful CRUD API for Student Records. Student: Prachi Lohkare (PRN: 202401040083). Tested with local and deployed endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -33,14 +33,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Aarav Sharma\",\n  \"rollNumber\": \"2301234\",\n  \"email\": \"aarav.sharma@mitaoe.ac.in\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 3\n}"
+              "raw": "{\n  \"name\": \"Prachi Lohkare\",\n  \"rollNumber\": \"202401040083\",\n  \"email\": \"prachi.lohkare@mitaoe.ac.in\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 3\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/students",
               "host": ["{{baseUrl}}"],
               "path": ["api", "students"]
             },
-            "description": "Creates a new student record with all faculty-required fields. Automatically stores the returned ID in the collection variable studentId."
+            "description": "Creates a new student record for Prachi Lohkare with all faculty-required fields. Automatically stores the returned ID in the collection variable studentId."
           },
           "event": [
             {
@@ -55,8 +55,8 @@
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.success).to.eql(true);",
                   "    pm.expect(jsonData.data).to.be.an('object');",
-                  "    pm.expect(jsonData.data.name).to.eql('Aarav Sharma');",
-                  "    pm.expect(jsonData.data.rollNumber).to.eql('2301234');",
+                  "    pm.expect(jsonData.data.name).to.eql('Prachi Lohkare');",
+                  "    pm.expect(jsonData.data.rollNumber).to.eql('202401040083');",
                   "    pm.expect(jsonData.data.course).to.eql('Computer Engineering');",
                   "    pm.expect(jsonData.data.year).to.eql(3);",
                   "    const newId = jsonData.data.id || jsonData.data._id;",
@@ -129,7 +129,7 @@
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.success).to.eql(true);",
                   "    pm.expect(jsonData.data).to.be.an('object');",
-                  "    pm.expect(jsonData.data.rollNumber).to.eql('2301234');",
+                  "    pm.expect(jsonData.data.rollNumber).to.eql('202401040083');",
                   "});"
                 ]
               }
@@ -153,7 +153,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Aarav S. Sharma\",\n  \"rollNumber\": \"2301234\",\n  \"email\": \"aarav.updated@mitaoe.ac.in\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 4\n}"
+              "raw": "{\n  \"name\": \"Prachi S. Lohkare\",\n  \"rollNumber\": \"202401040083\",\n  \"email\": \"prachi.updated@mitaoe.ac.in\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 4\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/students/{{studentId}}",
@@ -174,8 +174,8 @@
                   "pm.test(\"Student updated with new year and email\", function () {",
                   "    const jsonData = pm.response.json();",
                   "    pm.expect(jsonData.success).to.eql(true);",
-                  "    pm.expect(jsonData.data.name).to.eql('Aarav S. Sharma');",
-                  "    pm.expect(jsonData.data.email).to.eql('aarav.updated@mitaoe.ac.in');",
+                  "    pm.expect(jsonData.data.name).to.eql('Prachi S. Lohkare');",
+                  "    pm.expect(jsonData.data.email).to.eql('prachi.updated@mitaoe.ac.in');",
                   "    pm.expect(jsonData.data.year).to.eql(4);",
                   "});"
                 ]
@@ -276,7 +276,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Bad Email Student\",\n  \"rollNumber\": \"2309999\",\n  \"email\": \"invalid-email-address\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 2\n}"
+              "raw": "{\n  \"name\": \"Bad Email Student\",\n  \"rollNumber\": \"202401040099\",\n  \"email\": \"invalid-email-address\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 2\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/students",
@@ -377,7 +377,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Aarav Sharma\",\n  \"rollNumber\": \"2301234\",\n  \"email\": \"invalid-email-address\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 9\n}"
+              "raw": "{\n  \"name\": \"Prachi Lohkare\",\n  \"rollNumber\": \"202401040083\",\n  \"email\": \"invalid-email-address\",\n  \"course\": \"Computer Engineering\",\n  \"year\": 9\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/students/{{studentId}}",

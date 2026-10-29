@@ -5,9 +5,11 @@ def create_project_zip():
     base_dir = r"C:\Users\tvmal\.gemini\antigravity\scratch\StudentSphere-API"
     output_zips = [
         os.path.join(base_dir, "PRN_Name_P6_Title.zip"),
-        os.path.join(base_dir, "202401040083_TejasMali_P6_StudentRecordsAPI.zip"),
+        os.path.join(base_dir, "202401040083_PrachiLohkare_P6_StudentRecordsAPI.zip"),
+        os.path.join(base_dir, "202401040083_Prachi_Lohkare_P6_Title.zip"),
         r"C:\Users\tvmal\.gemini\antigravity\scratch\PRN_Name_P6_Title.zip",
-        r"C:\Users\tvmal\.gemini\antigravity\scratch\202401040083_TejasMali_P6_StudentRecordsAPI.zip"
+        r"C:\Users\tvmal\.gemini\antigravity\scratch\202401040083_PrachiLohkare_P6_StudentRecordsAPI.zip",
+        r"C:\Users\tvmal\.gemini\antigravity\scratch\202401040083_Prachi_Lohkare_P6_Title.zip"
     ]
 
     # Patterns / directories to exclude

@@ -1,5 +1,8 @@
 # Student Records RESTful CRUD API
 
+**Student Name:** Prachi Lohkare  
+**PRN / Roll Number:** 202401040083  
+**GitHub Profile:** [@prachilohkare8-debug](https://github.com/prachilohkare8-debug)  
 **Institution:** MIT Academy of Engineering, Pune (MITAOE)  
 **Department:** School of Computer Engineering  
 **Course:** Web Technology (2304362L) — T.Y. B.Tech (AY 2025–26)  
@@ -193,9 +196,9 @@ npm test
 ### 1. Create Student (`POST /api/students`)
 ```json
 {
-  "name": "Aarav Sharma",
-  "rollNumber": "2301234",
-  "email": "aarav.sharma@mitaoe.ac.in",
+  "name": "Prachi Lohkare",
+  "rollNumber": "202401040083",
+  "email": "prachi.lohkare@mitaoe.ac.in",
   "course": "Computer Engineering",
   "year": 3
 }
@@ -204,9 +207,9 @@ npm test
 ### 2. Update Student (`PUT /api/students/:id`)
 ```json
 {
-  "name": "Aarav S. Sharma",
-  "rollNumber": "2301234",
-  "email": "aarav.updated@mitaoe.ac.in",
+  "name": "Prachi S. Lohkare",
+  "rollNumber": "202401040083",
+  "email": "prachi.updated@mitaoe.ac.in",
   "course": "Computer Engineering",
   "year": 4
 }
@@ -222,9 +225,9 @@ npm test
   "success": true,
   "message": "Student created successfully.",
   "data": {
-    "name": "Aarav Sharma",
-    "rollNumber": "2301234",
-    "email": "aarav.sharma@mitaoe.ac.in",
+    "name": "Prachi Lohkare",
+    "rollNumber": "202401040083",
+    "email": "prachi.lohkare@mitaoe.ac.in",
     "course": "Computer Engineering",
     "year": 3,
     "id": "6ae3b68843f0c07441f735af",
@@ -242,9 +245,9 @@ npm test
   "data": [
     {
       "id": "6ae3b68843f0c07441f735af",
-      "name": "Aarav Sharma",
-      "rollNumber": "2301234",
-      "email": "aarav.sharma@mitaoe.ac.in",
+      "name": "Prachi Lohkare",
+      "rollNumber": "202401040083",
+      "email": "prachi.lohkare@mitaoe.ac.in",
       "course": "Computer Engineering",
       "year": 3
     }
@@ -321,7 +324,7 @@ npm test
    ```
 2. Log in to [Render](https://render.com/).
 3. Click **New +** > **Web Service**.
-4. Connect your GitHub repository `StudentSphere-API`.
+4. Connect your GitHub repository `StudentSphere-API` (from `prachilohkare8-debug`).
 5. Configure the service settings:
    - **Name:** `studentsphere-api`
    - **Runtime:** `Node`

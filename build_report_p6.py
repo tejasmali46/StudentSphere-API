@@ -195,8 +195,9 @@ def build_pdf(filename):
 
     # Student Details Table Box
     student_meta = [
-        [Paragraph("<b>Student Name:</b>", body), Paragraph("Tejas Mali", body)],
+        [Paragraph("<b>Student Name:</b>", body), Paragraph("Prachi Lohkare", body)],
         [Paragraph("<b>PRN / Roll Number:</b>", body), Paragraph("202401040083", body)],
+        [Paragraph("<b>GitHub Profile / Repo:</b>", body), Paragraph("prachilohkare8-debug / StudentSphere-API", body)],
         [Paragraph("<b>Division / Batch:</b>", body), Paragraph("TY COMP - Batch B2", body)],
         [Paragraph("<b>Institute:</b>", body), Paragraph("MIT Academy of Engineering, Alandi (D.), Pune", body)],
         [Paragraph("<b>Department:</b>", body), Paragraph("School of Computer Engineering", body)],
@@ -432,9 +433,9 @@ def build_pdf(filename):
     # Placeholder 1: POST
     story.append(create_screenshot_placeholder(
         "Screenshot 1: POST — Create Student Successfully",
-        "Student record created with all faculty-required fields. ID captured dynamically.",
+        "Student record created for Prachi Lohkare with all faculty-required fields. ID captured dynamically.",
         "POST", "http://localhost:3000/api/students", "201 Created",
-        """{ "success": true, "message": "Student created successfully.", "data": { "name": "Aarav Sharma", "rollNumber": "2301234", "email": "aarav.sharma@mitaoe.ac.in", "course": "Computer Engineering", "year": 3, "id": "6ae3b68843f0c07441f735af" } }"""
+        """{ "success": true, "message": "Student created successfully.", "data": { "name": "Prachi Lohkare", "rollNumber": "202401040083", "email": "prachi.lohkare@mitaoe.ac.in", "course": "Computer Engineering", "year": 3, "id": "6ae3b68843f0c07441f735af" } }"""
     ))
     story.append(Spacer(1, 10))
 
@@ -443,7 +444,7 @@ def build_pdf(filename):
         "Screenshot 2: GET — Retrieve All Students",
         "Returns all registered student records array with total count attribute.",
         "GET", "http://localhost:3000/api/students", "200 OK",
-        """{ "success": true, "count": 2, "data": [ { "id": "6ae3b68843f0c07441f735af", "name": "Aarav Sharma", "rollNumber": "2301234", "course": "Computer Engineering", "year": 3 } ] }"""
+        """{ "success": true, "count": 2, "data": [ { "id": "6ae3b68843f0c07441f735af", "name": "Prachi Lohkare", "rollNumber": "202401040083", "course": "Computer Engineering", "year": 3 } ] }"""
     ))
     story.append(Spacer(1, 10))
 
@@ -452,7 +453,7 @@ def build_pdf(filename):
         "Screenshot 3: GET — Retrieve Student by ID",
         "Retrieves the single student document matching the specified 24-character hex ID.",
         "GET", "http://localhost:3000/api/students/6ae3b68843f0c07441f735af", "200 OK",
-        """{ "success": true, "message": "Student retrieved successfully.", "data": { "id": "6ae3b68843f0c07441f735af", "name": "Aarav Sharma", "rollNumber": "2301234", "year": 3 } }"""
+        """{ "success": true, "message": "Student retrieved successfully.", "data": { "id": "6ae3b68843f0c07441f735af", "name": "Prachi Lohkare", "rollNumber": "202401040083", "year": 3 } }"""
     ))
 
     story.append(PageBreak())
@@ -462,7 +463,7 @@ def build_pdf(filename):
         "Screenshot 4: PUT — Update Student Successfully",
         "Updates student record attributes (promoted to Year 4 and updated email).",
         "PUT", "http://localhost:3000/api/students/6ae3b68843f0c07441f735af", "200 OK",
-        """{ "success": true, "message": "Student updated successfully.", "data": { "name": "Aarav S. Sharma", "rollNumber": "2301234", "email": "aarav.updated@mitaoe.ac.in", "year": 4 } }"""
+        """{ "success": true, "message": "Student updated successfully.", "data": { "name": "Prachi S. Lohkare", "rollNumber": "202401040083", "email": "prachi.updated@mitaoe.ac.in", "year": 4 } }"""
     ))
     story.append(Spacer(1, 10))
 
@@ -471,7 +472,7 @@ def build_pdf(filename):
         "Screenshot 5: DELETE — Delete Student Successfully",
         "Removes student record from MongoDB Atlas collection with confirmation.",
         "DELETE", "http://localhost:3000/api/students/6ae3b68843f0c07441f735af", "200 OK",
-        """{ "success": true, "message": "Student deleted successfully.", "data": { "id": "6ae3b68843f0c07441f735af", "name": "Aarav S. Sharma", "rollNumber": "2301234" } }"""
+        """{ "success": true, "message": "Student deleted successfully.", "data": { "id": "6ae3b68843f0c07441f735af", "name": "Prachi S. Lohkare", "rollNumber": "202401040083" } }"""
     ))
     story.append(Spacer(1, 10))
 
@@ -499,7 +500,7 @@ def build_pdf(filename):
         "Screenshot 8: Deployed API Live Response (Render Cloud)",
         "Live cloud web service responding from Render production deployment.",
         "GET", "https://studentsphere-api.onrender.com/api/students", "200 OK",
-        """[ { "name": "Tejas Mali", "rollNo": "2301234", "department": "Computer Engineering", "email": "tejas.mali@mitaoe.ac.in", "_id": "6ae3b599db0cfeaf6b3a059b" } ]"""
+        """[ { "name": "Prachi Lohkare", "rollNo": "202401040083", "department": "Computer Engineering", "email": "prachi.lohkare@mitaoe.ac.in", "_id": "6ae3b599db0cfeaf6b3a059b" } ]"""
     ))
     story.append(Spacer(1, 10))
 
@@ -508,7 +509,7 @@ def build_pdf(filename):
         "Screenshot 9: MongoDB Atlas Cloud Database Collection",
         "MongoDB Atlas Web Dashboard / Compass showing documents in students collection.",
         "DB QUERY", "Atlas Cluster0 / studentsphere_db.students", "Active WiredTiger Storage",
-        """Database: studentsphere_db | Collection: students | Documents: [{ "_id": ObjectId("6ae3b688..."), "name": "Aarav Sharma", "rollNumber": "2301234", "course": "Computer Engineering", "year": 3 }]"""
+        """Database: studentsphere_db | Collection: students | Documents: [{ "_id": ObjectId("6ae3b688..."), "name": "Prachi Lohkare", "rollNumber": "202401040083", "course": "Computer Engineering", "year": 3 }]"""
     ))
 
     story.append(PageBreak())
@@ -615,5 +616,17 @@ def build_pdf(filename):
     print(f"PDF report successfully created: {filename}")
 
 if __name__ == '__main__':
-    out_pdf = r"C:\Users\tvmal\.gemini\antigravity\scratch\StudentSphere-API\PRN_Name_P6_Report.pdf"
-    build_pdf(out_pdf)
+    base_dir = r"C:\Users\tvmal\.gemini\antigravity\scratch\StudentSphere-API"
+    scratch_dir = r"C:\Users\tvmal\.gemini\antigravity\scratch"
+    
+    out_pdf1 = os.path.join(base_dir, "PRN_Name_P6_Report.pdf")
+    out_pdf2 = os.path.join(base_dir, "202401040083_PrachiLohkare_P6_Report.pdf")
+    out_pdf3 = os.path.join(scratch_dir, "202401040083_PrachiLohkare_P6_Report.pdf")
+    out_pdf4 = os.path.join(scratch_dir, "PRN_Name_P6_Report.pdf")
+
+    build_pdf(out_pdf1)
+    import shutil
+    shutil.copyfile(out_pdf1, out_pdf2)
+    shutil.copyfile(out_pdf1, out_pdf3)
+    shutil.copyfile(out_pdf1, out_pdf4)
+    print("All PDF reports generated and synced for Prachi Lohkare (202401040083)!")

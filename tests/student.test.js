@@ -35,9 +35,9 @@ afterAll(async () => {
 
 // Payload matching faculty specification
 const facultyStudentPayload = {
-  name: 'Aarav Sharma',
-  rollNumber: '2301234',
-  email: 'aarav.sharma@mitaoe.ac.in',
+  name: 'Prachi Lohkare',
+  rollNumber: '202401040083',
+  email: 'prachi.lohkare@mitaoe.ac.in',
   course: 'Computer Engineering',
   year: 3,
 };
@@ -280,9 +280,9 @@ describe('Student Records RESTful API - Automated Test Suite', () => {
       const created = await Student.create(facultyStudentPayload);
 
       const updatePayload = {
-        name: 'Aarav S. Sharma',
+        name: 'Prachi S. Lohkare',
         rollNumber: created.rollNumber,
-        email: 'aarav.updated@mitaoe.ac.in',
+        email: 'prachi.updated@mitaoe.ac.in',
         course: 'Computer Engineering',
         year: 4,
       };
@@ -293,8 +293,8 @@ describe('Student Records RESTful API - Automated Test Suite', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.name).toBe('Aarav S. Sharma');
-      expect(res.body.data.email).toBe('aarav.updated@mitaoe.ac.in');
+      expect(res.body.data.name).toBe('Prachi S. Lohkare');
+      expect(res.body.data.email).toBe('prachi.updated@mitaoe.ac.in');
       expect(res.body.data.year).toBe(4);
     });
 

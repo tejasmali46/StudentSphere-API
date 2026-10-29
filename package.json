@@ -17,7 +17,11 @@
     "crud",
     "mitaoe"
   ],
-  "author": "MITAOE Computer Engineering Student",
+  "author": "Prachi Lohkare (MITAOE School of Computer Engineering)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prachilohkare8-debug/StudentSphere-API.git"
+  },
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
